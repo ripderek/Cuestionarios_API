@@ -10,3 +10,4 @@ Esto debe ir en .env
 ##Ejecucion
 Ejecutar en consola con
 -npm run dev
+-npm start (para despliegue)
