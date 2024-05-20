@@ -42,6 +42,8 @@ const {
   fu_ver_detalle_salto,
   fu_listar_niveles_saltos_seleccion,
   fu_preguntas_saltos,
+  SP_registrar_salto_nivel_test,
+  SP_Eliminar_Salto_Nivel,
 } = require("../controllers/Test_/test-controller");
 
 //router.post('/Login', verificaUser);
@@ -139,7 +141,7 @@ router.get(
 );
 
 router.get(
-  "/fu_ver_detalle_salto/:p_id_test/:p_id_nivel/:p_id_seccion",
+  "/fu_ver_detalle_salto/:p_id_test/:p_id_nivel/:p_id_seccion/:p_preguta/:p_respuesta",
   fu_ver_detalle_salto
 );
 router.get(
@@ -148,5 +150,6 @@ router.get(
 );
 
 router.get("/fu_preguntas_saltos/:p_id_nivel", fu_preguntas_saltos);
-
+router.post("/SP_registrar_salto_nivel_test", SP_registrar_salto_nivel_test);
+router.post("/SP_Eliminar_Salto_Nivel", SP_Eliminar_Salto_Nivel);
 module.exports = router;
