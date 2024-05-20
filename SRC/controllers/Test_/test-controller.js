@@ -718,6 +718,21 @@ const fu_listar_niveles_saltos_seleccion = async (req, res, next) => {
     return res.status(404).json({ message: error.message });
   }
 };
+const fu_preguntas_saltos = async (req, res, next) => {
+  try {
+    const { p_id_nivel } = req.params;
+    // console.log("error aqui");
+    console.log(req.params);
+    const result = await pool.query("select * from fu_preguntas_saltos($1)", [
+      p_id_nivel,
+    ]);
+    console.log(result.rows);
+    return res.status(200).json(result.rows);
+  } catch (error) {
+    console.log(error);
+    return res.status(404).json({ message: error.message });
+  }
+};
 module.exports = {
   crear_test,
   test_usuario,
@@ -759,4 +774,5 @@ module.exports = {
   fu_listar_saltos_seccion,
   fu_ver_detalle_salto,
   fu_listar_niveles_saltos_seleccion,
+  fu_preguntas_saltos,
 };
