@@ -41,6 +41,7 @@ const {
   fu_listar_saltos_seccion,
   fu_ver_detalle_salto,
   fu_listar_niveles_saltos_seleccion,
+  fu_preguntas_saltos,
 } = require("../controllers/Test_/test-controller");
 
 //router.post('/Login', verificaUser);
@@ -145,5 +146,7 @@ router.get(
   "/fu_listar_niveles_saltos_seleccion/:p_id_test",
   fu_listar_niveles_saltos_seleccion
 );
+
+router.get("/fu_preguntas_saltos/:p_id_nivel", fu_preguntas_saltos);
 
 module.exports = router;
