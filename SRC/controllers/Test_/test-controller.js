@@ -687,12 +687,13 @@ const fu_listar_saltos_seccion = async (req, res, next) => {
 };
 const fu_ver_detalle_salto = async (req, res, next) => {
   try {
-    const { p_id_test, p_id_nivel, p_id_seccion } = req.params;
+    const { p_id_test, p_id_nivel, p_id_seccion, p_preguta, p_respuesta } =
+      req.params;
     // console.log("error aqui");
     console.log(req.params);
     const result = await pool.query(
-      "select * from fu_ver_detalle_salto($1,$2,$3)",
-      [p_id_test, p_id_nivel, p_id_seccion]
+      "select * from fu_ver_detalle_salto($1,$2,$3,$4,$5)",
+      [p_id_test, p_id_nivel, p_id_seccion, p_preguta, p_respuesta]
     );
     console.log(result.rows);
     return res.status(200).json(result.rows);
@@ -731,6 +732,71 @@ const fu_preguntas_saltos = async (req, res, next) => {
   } catch (error) {
     console.log(error);
     return res.status(404).json({ message: error.message });
+  }
+};
+//funcion para crear un salto de un nivel en un test
+const SP_registrar_salto_nivel_test = async (req, res, next) => {
+  try {
+    const {
+      p_IdOpcionSalto,
+      p_IdPregunta,
+      p_IdSeccion,
+      p_IdTest,
+      p_NivelDestino,
+      p_NivelOrigen,
+    } = req.body;
+    console.log(req.body);
+    const result = await pool.query(
+      "call SP_registrar_salto_nivel_test($1,$2,$3,$4,$5,$6)",
+      [
+        p_IdOpcionSalto,
+        p_IdPregunta,
+        p_IdSeccion,
+        p_IdTest,
+        p_NivelDestino,
+        p_NivelOrigen,
+      ]
+    );
+
+    return res
+      .status(200)
+      .json({ message: "Se registro el salto de nivel en el test" });
+    //return res.status(200).json(result.rows);
+  } catch (error) {
+    console.log(error);
+    return res.status(404).json({ error: error.message });
+  }
+};
+const SP_Eliminar_Salto_Nivel = async (req, res, next) => {
+  try {
+    const {
+      p_IdOpcionSalto,
+      p_IdPregunta,
+      p_IdSeccion,
+      p_IdTest,
+      p_NivelDestino,
+      p_NivelOrigen,
+    } = req.body;
+    console.log(req.body);
+    const result = await pool.query(
+      "call SP_Eliminar_Salto_Nivel($1,$2,$3,$4,$5,$6)",
+      [
+        p_IdOpcionSalto,
+        p_IdPregunta,
+        p_IdSeccion,
+        p_IdTest,
+        p_NivelDestino,
+        p_NivelOrigen,
+      ]
+    );
+
+    return res
+      .status(200)
+      .json({ message: "Se elimino el salto de nivel en el test" });
+    //return res.status(200).json(result.rows);
+  } catch (error) {
+    console.log(error);
+    return res.status(404).json({ error: error.message });
   }
 };
 module.exports = {
@@ -775,4 +841,6 @@ module.exports = {
   fu_ver_detalle_salto,
   fu_listar_niveles_saltos_seleccion,
   fu_preguntas_saltos,
+  SP_registrar_salto_nivel_test,
+  SP_Eliminar_Salto_Nivel,
 };
