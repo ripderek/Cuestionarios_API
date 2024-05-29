@@ -216,7 +216,15 @@ const ingreso_participante_test = async (req, res, next) => {
     );
 
     //dentro de la base de datos crear un cursor que ingrese todas las secciones que va a realizar un participante
-    const result = await pool.query(
+    const client = await pool.connect();
+    // Inicia la transacción
+    await client.query("BEGIN");
+
+    // Establece el nivel de aislamiento
+    await client.query("SET TRANSACTION ISOLATION LEVEL READ COMMITTED");
+
+    // Ejecuta la función
+    const result = await client.query(
       "call ingresar_participante_test($1,$2,$3,$4,$5)",
       [
         p_token_id_participante,
@@ -227,9 +235,24 @@ const ingreso_participante_test = async (req, res, next) => {
       ]
     );
 
+    // Confirma la transacción
+    await client.query("COMMIT");
+    /*
+    const result = await pool.query(
+      "call ingresar_participante_test($1,$2,$3,$4,$5)",
+      [
+        p_token_id_participante,
+        p_token_id_test,
+        p_facultad,
+        p_carrera,
+        p_semestre,
+      ]
+    );
+ */
     return res.status(200).json({ message: "Se ha registro en el test" });
     //return res.status(200).json(result.rows);
   } catch (error) {
+    console.log("Error aqui en el generador");
     console.log(error);
     return res.status(404).json({ error: error.message });
   }
@@ -237,11 +260,27 @@ const ingreso_participante_test = async (req, res, next) => {
 //verificar si el usuario ya se encuentra registrado en el test
 const verificacion_ingreso_participante = async (req, res, next) => {
   try {
+    const client = await pool.connect();
     const { token_participante, token_test } = req.params;
+    /* 
     const result = await pool.query(
       "select * from verificacion_participante_test($1,$2)",
       [token_participante, token_test]
     );
+    */
+    await client.query("BEGIN");
+
+    // Establece el nivel de aislamiento
+    await client.query("SET TRANSACTION ISOLATION LEVEL READ COMMITTED");
+
+    // Ejecuta la función
+    const result = await client.query(
+      "select * from verificacion_participante_test($1,$2)",
+      [token_participante, token_test]
+    );
+
+    // Confirma la transacción
+    await client.query("COMMIT");
     return res.status(200).json(result.rows[0]);
   } catch (error) {
     return res.status(404).json({ message: error.message });
@@ -319,11 +358,28 @@ const eliminar_test = async (req, res, next) => {
 //funcion para expulsar o eliminar participante del test, esto conlleva eliminar todo su progreso
 const eliminar_participante_test = async (req, res, next) => {
   try {
+    console.log("entrando a la funcion");
+    const client = await pool.connect();
     const { id } = req.params;
+    await client.query("BEGIN");
+
+    // Establece el nivel de aislamiento
+    await client.query("SET TRANSACTION ISOLATION LEVEL READ COMMITTED");
+
+    // Ejecuta la función
+    const result = await client.query(
+      "call sp_eliminar_o_expulsar_participante_test2($1)",
+      [id]
+    );
+
+    // Confirma la transacción
+    await client.query("COMMIT");
+    /*
     const result = await pool.query(
       "call SP_Eliminar_o_expulsar_participante_test($1)",
       [id]
     );
+    */
     return res
       .status(200)
       .json({ message: "Se ha eliminado el participante del  test" });
@@ -372,11 +428,30 @@ const datos_token_id_test = async (req, res, next) => {
 const Excel = require("exceljs");
 
 const Generate_Excel_TODOS = async (req, res, next) => {
+  const client = await pool.connect();
   try {
     const { id } = req.params;
-    const result = await pool.query("select * from FU_Generate_Excel($1)", [
-      id,
-    ]);
+    /*
+    const result = await pool.query(
+      " BEGIN; SET TRANSACTION ISOLATION LEVEL READ COMMITTED; select * from FU_Generate_Excel($1) FOR SHARE; COMMIT;",
+      [id]
+    );
+    */
+    // Inicia la transacción
+    await client.query("BEGIN");
+
+    // Establece el nivel de aislamiento
+    await client.query("SET TRANSACTION ISOLATION LEVEL READ COMMITTED");
+
+    // Ejecuta la función
+    const result = await client.query(
+      "SELECT * FROM FU_Generate_Excel($1) FOR SHARE",
+      [id]
+    );
+
+    // Confirma la transacción
+    await client.query("COMMIT");
+
     // Crear un nuevo libro de Excel
     const workbook = new Excel.Workbook();
     const worksheet = workbook.addWorksheet("Datos");
@@ -522,6 +597,24 @@ const registrar_ingreso = async (req, res, next) => {
   try {
     const { user_id_token, test_id_token, user_age } = req.body;
     const ip = req.ip;
+    const client = await pool.connect();
+    await client.query("BEGIN");
+
+    // Establece el nivel de aislamiento
+    await client.query("SET TRANSACTION ISOLATION LEVEL READ COMMITTED");
+
+    // Ejecuta la función
+    const result = await client.query("call registrar_ingreso($1,$2,$3,$4)", [
+      user_id_token,
+      test_id_token,
+      ip,
+      user_age,
+    ]);
+
+    // Confirma la transacción
+    await client.query("COMMIT");
+
+    /* 
 
     const result = await pool.query("call registrar_ingreso($1,$2,$3,$4)", [
       user_id_token,
@@ -529,6 +622,7 @@ const registrar_ingreso = async (req, res, next) => {
       ip,
       user_age,
     ]);
+    */
     return res.status(200).json({ message: "Se registro la respuesta" });
     //return res.status(200).json(result.rows);
   } catch (error) {
