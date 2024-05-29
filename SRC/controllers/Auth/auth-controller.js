@@ -176,6 +176,7 @@ const verificaUser = async (req, res, next) => {
 // funcion para logear a un participante o registrarlo si no esta registrado xd skere modo diablo
 const login_register_participante = async (req, res, next) => {
   try {
+    const client = await pool.connect();
     const { email, name, hd } = req.body;
     //hd = "uteq.edu.ec"
     //verificar si el dominio ingresado pertencese a la UTEQ
@@ -183,11 +184,19 @@ const login_register_participante = async (req, res, next) => {
       //hacer todo el proceso si el dominio es de la U
       //primer verificar si el correo ya esta registrado mediante una consulta de base de datos a tabla participanteGmail
       //auth_data_participantes
+      await client.query("BEGIN");
+      await client.query("SET TRANSACTION ISOLATION LEVEL READ COMMITTED");
+      /*
       const users = await pool.query(
         "select * from auth_data_participantes($1)",
         [email]
       );
-
+      */
+      const users = await client.query(
+        "SELECT * FROM auth_data_participantes($1) FOR SHARE",
+        [email]
+      );
+      await client.query("COMMIT");
       let verification = users.rows[0];
       //Extraer el resultado del bool para saber si el login es correcto
       let result = verification.r_verificado;
@@ -195,17 +204,36 @@ const login_register_participante = async (req, res, next) => {
       if (!result) {
         //como no existe el usuario hay que crearlo skere modo diablo
         //call sp_registrar_participantes()
+        await client.query("BEGIN");
+        await client.query("SET TRANSACTION ISOLATION LEVEL READ COMMITTED");
+        /*
         const result = await pool.query(
           "call sp_registrar_participantes($1,$2)",
           [email, name]
         );
+        */
+        const result = await client.query(
+          "call sp_registrar_participantes($1,$2)",
+          [email, name]
+        );
+        await client.query("COMMIT");
       }
       //de todos modos otorgar el token ya sea que exista el usuario o recien se halla anadido
       //primero retornar el id del participante dependiendo del correo
+      await client.query("BEGIN");
+      await client.query("SET TRANSACTION ISOLATION LEVEL READ COMMITTED");
+      /*
       const data_auth = await pool.query(
         "select * from id_participante_emil($1)",
         [email]
       );
+      */
+      const data_auth = await client.query(
+        "select * from id_participante_emil($1) FOR SHARE",
+        [email]
+      );
+      await client.query("COMMIT");
+
       let data = data_auth.rows[0];
       let userd = data.r_id_participante;
       //pasos para el token
